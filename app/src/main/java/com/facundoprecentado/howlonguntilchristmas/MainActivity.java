@@ -1,25 +1,25 @@
-package com.facundoprecentado.howlonguntilchristmass;
+package com.facundoprecentado.howlonguntilchristmas;
 
 import android.icu.util.TimeZone;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Days;
-import org.joda.time.Hours;
-import org.joda.time.Minutes;
-
-import java.sql.Time;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -54,18 +54,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void calculateTime() {
-        // Get local TimeZone
-        TimeZone tz = TimeZone.getDefault();
-        DateTimeZone localTimeZone = DateTimeZone.forID(tz.getID());
 
-        DateTime start = new DateTime(localTimeZone);
-        DateTime end = new DateTime(start.getYear(), 12, 24, 0, 0, 0, localTimeZone);
+        LocalDateTime ldt = LocalDateTime.now();
+        ZonedDateTime now = ldt.atZone(ZoneId.of(TimeZone.getDefault().getID()));
+        ZonedDateTime christmas = ZonedDateTime.of ( LocalDate.of ( now.getYear() , 12 , 24 ) , LocalTime.of ( 0 , 0 ) , ZoneId.of (TimeZone.getDefault().getID()));
 
-        int daysBetweenDates = Days.daysBetween(start, end).getDays();
-        int hoursBetweenDates = Hours.hoursBetween(start, end).getHours();
-        int minutesBetweenDates = Minutes.minutesBetween(start, end).getMinutes();
+        long diff = ChronoUnit.MILLIS.between(now, christmas);
 
-        timeUntilText.setText("Days Until Christmass: " + daysBetweenDates + " Hours: " + hoursBetweenDates % 24 + " Minutes: " + minutesBetweenDates % 60);
+        new CountDownTimer(diff, 1000) {
+
+            public void onTick(long millisBetweenDates) {
+                // Days
+                long days = TimeUnit.MILLISECONDS.toDays(millisBetweenDates);
+
+                // Hours
+                long diffMinusDays = millisBetweenDates - TimeUnit.DAYS.toMillis(days);
+                long hours = TimeUnit.MILLISECONDS.toHours(diffMinusDays);
+
+                // Minutes
+                long diffMinusHours = millisBetweenDates - (TimeUnit.DAYS.toMillis(days) + TimeUnit.HOURS.toMillis(hours));
+                long minutes = TimeUnit.MILLISECONDS.toMinutes(diffMinusHours);
+
+                // Seconds
+                long diffMinusMinutes =  millisBetweenDates - (TimeUnit.DAYS.toMillis(days) + TimeUnit.HOURS.toMillis(hours) + TimeUnit.MINUTES.toMillis(minutes));
+                long seconds = TimeUnit.MILLISECONDS.toSeconds(diffMinusMinutes);
+
+                timeUntilText.setText("Christmas is coming in " + days + " days and " + hours + ":" + minutes + ":" + seconds);
+            }
+
+            public void onFinish() {
+                timeUntilText.setText("Merry Christmas!!!");
+            }
+        }.start();
     }
 
     @Override
