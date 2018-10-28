@@ -1,5 +1,6 @@
 package com.facundoprecentado.howlonguntilchristmas;
 
+import android.content.Intent;
 import android.icu.util.TimeZone;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -37,8 +38,11 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, "Find out how long until Christmas!");
+                sendIntent.setType("text/plain");
+                startActivity(sendIntent);
             }
         });
 
