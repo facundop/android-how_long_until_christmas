@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">How Long Until christmas</string>
-    <string name="action_settings">Soon</string>
+    <string name="action_settings">Share the news with someone</string>
 
-    <string name="calculate_time_button">How long until christmas?</string>
+    <string name="time_until_text"></string>
+    <string name="calculate_time_button">How long until Christmas?</string>
 </resources>
