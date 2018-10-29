@@ -1,7 +1,9 @@
 package com.facundoprecentado.howlonguntilchristmas;
 
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.icu.util.TimeZone;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.design.widget.FloatingActionButton;
@@ -21,12 +23,15 @@ import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,8 +40,11 @@ import java.util.concurrent.TimeUnit;
 public class MainActivity extends AppCompatActivity implements RewardedVideoAdListener {
 
     private RewardedVideoAd mRewardedVideoAd;
-    private TextView timeUntilText;
+    private TextView daysUntilText;
+    private TextView hoursUntilText;
     private Button calculateTimeButton;
+    private String TestRewardedVideoAd = "ca-app-pub-3940256099942544/5224354917";
+    private String RewardedVideoAd = "ca-app-pub-1088902000251944/6033351380";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +57,8 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
         mRewardedVideoAd.setRewardedVideoAdListener(this);
 
-        timeUntilText = (TextView) findViewById(R.id.timeUntilText);
+        daysUntilText = (TextView) findViewById(R.id.daysUntilText);
+        hoursUntilText = (TextView) findViewById(R.id.hoursUntilText);
         calculateTimeButton = (Button) findViewById(R.id.calculateTimeButton);
         calculateTimeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
     }
 
     private void loadRewardedVideoAd() {
-        mRewardedVideoAd.loadAd("ca-app-pub-1088902000251944/6033351380",
+        mRewardedVideoAd.loadAd(RewardedVideoAd,
                 new AdRequest.Builder().build());
     }
 
@@ -85,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         if (id == R.id.action_share) {
             Intent sendIntent = new Intent();
             sendIntent.setAction(Intent.ACTION_SEND);
-            sendIntent.putExtra(Intent.EXTRA_TEXT, "Find out how long until Christmas with this App!");
+            sendIntent.putExtra(Intent.EXTRA_TEXT, "Find out how long until Christmas with this App: https://goo.gl/dTXAbo");
             sendIntent.setType("text/plain");
             startActivity(sendIntent);
         }
@@ -99,11 +108,14 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         loadRewardedVideoAd();
 
         // Reward the user.
-        LocalDateTime ldt = LocalDateTime.now();
-        ZonedDateTime now = ldt.atZone(ZoneId.of(TimeZone.getDefault().getID()));
-        ZonedDateTime christmas = ZonedDateTime.of ( LocalDate.of ( now.getYear() , 12 , 24 ) , LocalTime.of ( 0 , 0 ) , ZoneId.of (TimeZone.getDefault().getID()));
+        long diff = 0;
 
-        long diff = ChronoUnit.MILLIS.between(now, christmas);
+        // Newer API can use LocalDateTime, ZonedDateTime and ChronoUnit
+        if(Build.VERSION.SDK_INT >= 26) {
+            diff = getDiffUntilChristmasInMillis();
+        } else {
+            diff = getDiffUntilChristmasInMillisForOlderDevices();
+        }
 
         new CountDownTimer(diff, 1000) {
 
@@ -123,13 +135,41 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                 long diffMinusMinutes =  millisBetweenDates - (TimeUnit.DAYS.toMillis(days) + TimeUnit.HOURS.toMillis(hours) + TimeUnit.MINUTES.toMillis(minutes));
                 long seconds = TimeUnit.MILLISECONDS.toSeconds(diffMinusMinutes);
 
-                timeUntilText.setText("Christmas is coming in " + days + " days and " + hours + ":" + minutes + ":" + seconds);
+                String daysTimer = days == 1 ? "day" : "days";
+                String hoursTimer = hours > 9 ? String.valueOf(hours) : "0" + String.valueOf(hours);
+                String minutesTimer = minutes > 9 ? String.valueOf(minutes) : "0" + String.valueOf(minutes);
+                String secondsTimer = seconds > 9 ? String.valueOf(seconds) : "0" + String.valueOf(seconds);
+
+                daysUntilText.setText(days + "  " + daysTimer);
+                hoursUntilText.setText(hoursTimer + ":" + minutesTimer + ":" + secondsTimer);
             }
 
             public void onFinish() {
-                timeUntilText.setText("Merry Christmas!!!");
+                daysUntilText.setText("Merry");
+                hoursUntilText.setText("Christmas!!!");
             }
         }.start();
+    }
+
+    private long getDiffUntilChristmasInMillisForOlderDevices() {
+        try {
+            Date now = new Date();
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/M/yyyy hh:mm:ss");
+            Date christmas = sdf.parse("24/12/" + now.getYear() + " 00:00:00");
+            return christmas.getTime() - now.getTime();
+        } catch (ParseException e) {
+            // TODO: Fix this crap
+        }
+        return 0;
+    }
+
+    @TargetApi(26)
+    private long getDiffUntilChristmasInMillis() {
+        LocalDateTime ldt = LocalDateTime.now();
+        ZonedDateTime now = ldt.atZone(ZoneId.of(TimeZone.getDefault().getID()));
+        ZonedDateTime christmas = ZonedDateTime.of ( LocalDate.of ( now.getYear() , 12 , 24 ) , LocalTime.of ( 0 , 0 ) , ZoneId.of (TimeZone.getDefault().getID()));
+
+        return ChronoUnit.MILLIS.between(now, christmas);
     }
 
     private void showError() {
