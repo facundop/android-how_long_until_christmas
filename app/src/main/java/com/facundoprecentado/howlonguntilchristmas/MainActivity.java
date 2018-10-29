@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
     }
 
     private void loadRewardedVideoAd() {
-        mRewardedVideoAd.loadAd("ca-app-pub-3940256099942544/5224354917",
+        mRewardedVideoAd.loadAd("ca-app-pub-1088902000251944/6033351380",
                 new AdRequest.Builder().build());
     }
 
