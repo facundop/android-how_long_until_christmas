@@ -151,11 +151,12 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         }.start();
     }
 
+    // Not replacing with Calendar. Just waiting for devices to move up to API 26 to deprecate this.
     private long getDiffUntilChristmasInMillisForOlderDevices() {
         try {
             Date now = new Date();
             SimpleDateFormat sdf = new SimpleDateFormat("dd/M/yyyy hh:mm:ss");
-            Date christmas = sdf.parse("24/12/" + now.getYear() + " 00:00:00");
+            Date christmas = sdf.parse("24/12/" + (now.getYear() + 1900) + " 00:00:00");
             return christmas.getTime() - now.getTime();
         } catch (ParseException e) {
             // TODO: Fix this crap
