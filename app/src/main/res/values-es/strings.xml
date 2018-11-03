@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cuanto falta para Navidad?</string>
+    <string name="action_settings">Comparte la noticia con tus amigos</string>
+    <string name="calculate_time_button">¿Cuanto falta para Navidad?</string>
+    <string name="day">dia</string>
+    <string name="days">días</string>
+    <string name="days_until_text">" "</string>
+    <string name="hours_until_text">" "</string>
+    <string name="merry">Feliz</string>
+    <string name="christmas">Navidad!!!</string>
+</resources>

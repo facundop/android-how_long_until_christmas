@@ -2,7 +2,11 @@
     <string name="app_name">How Long Until Christmas</string>
     <string name="action_settings">Share the news with someone</string>
 
-    <string name="days_until_text"></string>
-    <string name="hours_until_text"></string>
+    <string name="days_until_text">" "</string>
+    <string name="hours_until_text">" "</string>
     <string name="calculate_time_button">How long until Christmas?</string>
+    <string name="day">day</string>
+    <string name="days">days</string>
+    <string name="merry">Merry</string>
+    <string name="christmas">Christmas!!!</string>
 </resources>

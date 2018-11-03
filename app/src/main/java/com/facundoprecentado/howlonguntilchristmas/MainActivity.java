@@ -135,18 +135,18 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                 long diffMinusMinutes =  millisBetweenDates - (TimeUnit.DAYS.toMillis(days) + TimeUnit.HOURS.toMillis(hours) + TimeUnit.MINUTES.toMillis(minutes));
                 long seconds = TimeUnit.MILLISECONDS.toSeconds(diffMinusMinutes);
 
-                String daysTimer = days == 1 ? "day" : "days";
+                String daysTimer = days == 1 ? getString(R.string.day) : getString(R.string.days);
                 String hoursTimer = hours > 9 ? String.valueOf(hours) : "0" + String.valueOf(hours);
                 String minutesTimer = minutes > 9 ? String.valueOf(minutes) : "0" + String.valueOf(minutes);
                 String secondsTimer = seconds > 9 ? String.valueOf(seconds) : "0" + String.valueOf(seconds);
 
-                daysUntilText.setText(days + "  " + daysTimer);
+                daysUntilText.setText(days + " " + daysTimer);
                 hoursUntilText.setText(hoursTimer + ":" + minutesTimer + ":" + secondsTimer);
             }
 
             public void onFinish() {
-                daysUntilText.setText("Merry");
-                hoursUntilText.setText("Christmas!!!");
+                daysUntilText.setText(getString(R.string.merry));
+                hoursUntilText.setText(R.string.christmas);
             }
         }.start();
     }
