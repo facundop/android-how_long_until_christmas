@@ -10,4 +10,5 @@
     <string name="merry">Merry</string>
     <string name="christmas">Christmas!!!</string>
     <string name="share_app_msg">Find out how long until Christmas with this App:</string>
+    <string name="share_app_button">Share</string>
 </resources>

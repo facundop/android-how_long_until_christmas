@@ -45,13 +45,12 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
     private Button calculateTimeButton;
     private String TestRewardedVideoAd = "ca-app-pub-3940256099942544/5224354917";
     private String RewardedVideoAd = "ca-app-pub-1088902000251944/6033351380";
+    private FloatingActionButton shareButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         // Use an activity context to get the rewarded video instance.
         mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
@@ -66,6 +65,17 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                 calculateTime();
             }
         });
+        shareButton = (FloatingActionButton) findViewById(R.id.shareButton);
+        shareButton.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View v) {
+               Intent sendIntent = new Intent();
+               sendIntent.setAction(Intent.ACTION_SEND);
+               sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_msg) + " https://goo.gl/dTXAbo");
+               sendIntent.setType("text/plain");
+               startActivity(sendIntent);
+           }
+        });
 
         loadRewardedVideoAd();
     }
@@ -79,27 +89,6 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         if (mRewardedVideoAd.isLoaded()) {
             mRewardedVideoAd.show();
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_share) {
-            Intent sendIntent = new Intent();
-            sendIntent.setAction(Intent.ACTION_SEND);
-            sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_msg) + " https://goo.gl/dTXAbo");
-            sendIntent.setType("text/plain");
-            startActivity(sendIntent);
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
