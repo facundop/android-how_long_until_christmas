@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -42,11 +44,15 @@ import java.util.concurrent.TimeUnit;
 public class MainActivity extends AppCompatActivity implements RewardedVideoAdListener {
 
     private RewardedVideoAd mRewardedVideoAd;
-    private TextView daysUntilText;
-    private TextView hoursUntilText;
-    private Button calculateTimeButton;
     private String TestRewardedVideoAd = "ca-app-pub-3940256099942544/5224354917";
     private String RewardedVideoAd = "ca-app-pub-1088902000251944/6033351380";
+
+    private TextInputLayout daysEditText;
+    private TextInputLayout hoursEditText;
+    private TextInputLayout minutesEditText;
+    private TextInputLayout secondsEditText;
+
+    private Button calculateTimeButton;
     private FloatingActionButton shareButton;
     private FloatingActionButton rateButton;
 
@@ -59,8 +65,9 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
         mRewardedVideoAd.setRewardedVideoAdListener(this);
 
-        daysUntilText = (TextView) findViewById(R.id.daysUntilText);
-        hoursUntilText = (TextView) findViewById(R.id.hoursUntilText);
+        //daysUntilText = (TextView) findViewById(R.id.daysUntilText);
+        //hoursUntilText = (TextView) findViewById(R.id.hoursUntilText);
+
         calculateTimeButton = (Button) findViewById(R.id.calculateTimeButton);
         calculateTimeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,6 +96,16 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                 startActivity(rateIntent);
             }
         });
+
+        daysEditText = (TextInputLayout) findViewById(R.id.days_text_input);
+        daysEditText.setVisibility(View.GONE);
+        hoursEditText = (TextInputLayout) findViewById(R.id.hours_text_input);
+        hoursEditText.setVisibility(View.GONE);
+        minutesEditText = (TextInputLayout) findViewById(R.id.minutes_text_input);
+        minutesEditText.setVisibility(View.GONE);
+        secondsEditText = (TextInputLayout) findViewById(R.id.seconds_text_input);
+        secondsEditText.setVisibility(View.GONE);
+
         loadRewardedVideoAd();
     }
 
@@ -136,18 +153,23 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                 long diffMinusMinutes =  millisBetweenDates - (TimeUnit.DAYS.toMillis(days) + TimeUnit.HOURS.toMillis(hours) + TimeUnit.MINUTES.toMillis(minutes));
                 long seconds = TimeUnit.MILLISECONDS.toSeconds(diffMinusMinutes);
 
-                String daysTimer = days == 1 ? getString(R.string.day) : getString(R.string.days);
                 String hoursTimer = hours > 9 ? String.valueOf(hours) : "0" + String.valueOf(hours);
                 String minutesTimer = minutes > 9 ? String.valueOf(minutes) : "0" + String.valueOf(minutes);
                 String secondsTimer = seconds > 9 ? String.valueOf(seconds) : "0" + String.valueOf(seconds);
 
-                daysUntilText.setText(days + " " + daysTimer);
-                hoursUntilText.setText(hoursTimer + ":" + minutesTimer + ":" + secondsTimer);
+                daysEditText.setVisibility(View.VISIBLE);
+                daysEditText.getEditText().setText(String.valueOf(days));
+                hoursEditText.setVisibility(View.VISIBLE);
+                hoursEditText.getEditText().setText(String.valueOf(hoursTimer));
+                minutesEditText.setVisibility(View.VISIBLE);
+                minutesEditText.getEditText().setText(String.valueOf(minutesTimer));
+                secondsEditText.setVisibility(View.VISIBLE);
+                secondsEditText.getEditText().setText(String.valueOf(secondsTimer));
+
             }
 
             public void onFinish() {
-                daysUntilText.setText(getString(R.string.merry));
-                hoursUntilText.setText(R.string.christmas);
+                // TODO: Add Merry Christmas message (before Christmas LOL)
             }
         }.start();
     }

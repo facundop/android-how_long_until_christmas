@@ -3,12 +3,13 @@
     <string name="app_name">Cuanto falta para Navidad?</string>
     <string name="action_settings">Comparte la noticia con tus amigos</string>
     <string name="calculate_time_button">¿Cuanto falta para Navidad?</string>
-    <string name="day">dia</string>
-    <string name="days">días</string>
-    <string name="days_until_text">" "</string>
-    <string name="hours_until_text">" "</string>
+    <string name="day">Día</string>
+    <string name="days">Días</string>
     <string name="merry">Feliz</string>
     <string name="christmas">Navidad!!!</string>
     <string name="share_app_msg">Descubre cuanto falta hasta Navidad:</string>
     <string name="share_app_button">Compartir</string>
+    <string name="hours">Horas</string>
+    <string name="minutes">Minutes</string>
+    <string name="seconds">Segundos</string>
 </resources>
