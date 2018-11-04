@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         if (id == R.id.action_share) {
             Intent sendIntent = new Intent();
             sendIntent.setAction(Intent.ACTION_SEND);
-            sendIntent.putExtra(Intent.EXTRA_TEXT, "Find out how long until Christmas with this App: https://goo.gl/dTXAbo");
+            sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_msg) + " https://goo.gl/dTXAbo");
             sendIntent.setType("text/plain");
             startActivity(sendIntent);
         }
