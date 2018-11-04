@@ -3,6 +3,7 @@ package com.facundoprecentado.howlonguntilchristmas;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.icu.util.TimeZone;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -10,6 +11,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -46,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
     private String TestRewardedVideoAd = "ca-app-pub-3940256099942544/5224354917";
     private String RewardedVideoAd = "ca-app-pub-1088902000251944/6033351380";
     private FloatingActionButton shareButton;
+    private FloatingActionButton rateButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +79,16 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                startActivity(sendIntent);
            }
         });
-
+        rateButton = (FloatingActionButton) findViewById(R.id.rateButton);
+        rateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent rateIntent = new Intent();
+                rateIntent.setAction(Intent.ACTION_VIEW);
+                rateIntent.setData(Uri.parse("market://details?id=" + getPackageName()));
+                startActivity(rateIntent);
+            }
+        });
         loadRewardedVideoAd();
     }
 
