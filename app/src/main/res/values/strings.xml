@@ -5,11 +5,10 @@
     <string name="calculate_time_button">How long until Christmas?</string>
     <string name="day">Day</string>
     <string name="days">Days</string>
-    <string name="merry">Merry</string>
-    <string name="christmas">Christmas!!!</string>
     <string name="share_app_msg">Find out how long until Christmas with this App:</string>
     <string name="share_app_button">Share</string>
     <string name="hours">Hours</string>
     <string name="minutes">Minutes</string>
     <string name="seconds">Seconds</string>
+    <string name="merry_cristmas_msg">Merry Christmas!!!</string>
 </resources>

@@ -27,6 +27,8 @@ import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 
+import org.w3c.dom.Text;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -51,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
     private TextInputLayout hoursEditText;
     private TextInputLayout minutesEditText;
     private TextInputLayout secondsEditText;
+
+    private TextView merryChristmasText;
 
     private Button calculateTimeButton;
     private FloatingActionButton shareButton;
@@ -105,6 +109,9 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         minutesEditText.setVisibility(View.GONE);
         secondsEditText = (TextInputLayout) findViewById(R.id.seconds_text_input);
         secondsEditText.setVisibility(View.GONE);
+
+        merryChristmasText = (TextView) findViewById(R.id.merryChristmasView);
+        merryChristmasText.setVisibility(View.GONE);
 
         loadRewardedVideoAd();
     }
@@ -169,7 +176,12 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
             }
 
             public void onFinish() {
-                // TODO: Add Merry Christmas message (before Christmas LOL)
+                daysEditText.setVisibility(View.GONE);
+                hoursEditText.setVisibility(View.GONE);
+                minutesEditText.setVisibility(View.GONE);
+                secondsEditText.setVisibility(View.GONE);
+
+                merryChristmasText.setVisibility(View.VISIBLE);
             }
         }.start();
     }

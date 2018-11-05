@@ -5,11 +5,10 @@
     <string name="calculate_time_button">¿Cuanto falta para Navidad?</string>
     <string name="day">Día</string>
     <string name="days">Días</string>
-    <string name="merry">Feliz</string>
-    <string name="christmas">Navidad!!!</string>
     <string name="share_app_msg">Descubre cuanto falta hasta Navidad:</string>
     <string name="share_app_button">Compartir</string>
     <string name="hours">Horas</string>
     <string name="minutes">Minutos</string>
     <string name="seconds">Segundos</string>
+    <string name="merry_cristmas_msg">Feliz Navidad!!!</string>
 </resources>
