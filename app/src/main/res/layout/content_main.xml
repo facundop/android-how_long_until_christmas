@@ -44,8 +44,7 @@
             android:id="@+id/days_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/days"
-            android:text="365" />
+            android:hint="@string/days" />
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
@@ -66,8 +65,7 @@
             android:id="@+id/hours_edit_text"
             android:layout_width="80dp"
             android:layout_height="wrap_content"
-            android:hint="@string/hours"
-            android:text="24" />
+            android:hint="@string/hours" />
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
@@ -88,8 +86,7 @@
             android:id="@+id/minutes_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/minutes"
-            android:text="60" />
+            android:hint="@string/minutes" />
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
@@ -110,8 +107,7 @@
             android:id="@+id/seconds_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/seconds"
-            android:text="60" />
+            android:hint="@string/seconds" />
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.FloatingActionButton
