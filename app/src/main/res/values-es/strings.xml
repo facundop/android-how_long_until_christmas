@@ -10,6 +10,6 @@
     <string name="share_app_msg">Descubre cuanto falta hasta Navidad:</string>
     <string name="share_app_button">Compartir</string>
     <string name="hours">Horas</string>
-    <string name="minutes">Minutes</string>
+    <string name="minutes">Minutos</string>
     <string name="seconds">Segundos</string>
 </resources>
