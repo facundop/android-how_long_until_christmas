@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
@@ -41,6 +42,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements RewardedVideoAdListener {
@@ -60,6 +63,19 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
     private FloatingActionButton shareButton;
     private FloatingActionButton rateButton;
 
+    private ConstraintLayout mainContentConstraintLayout;
+
+    // TODO: Move to a select screen
+    int[] drawablearray=new int[]{R.drawable.background_01,
+            R.drawable.background_02,
+            R.drawable.background_03,
+            R.drawable.background_04,
+            R.drawable.background_05,
+            R.drawable.background_06,
+            R.drawable.background_07};
+    Timer _t;
+    public static int count=0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,6 +92,9 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                 calculateTime();
             }
         });
+        calculateTimeButton.setClickable(false);
+        calculateTimeButton.setText(R.string.loading);
+
         shareButton = (FloatingActionButton) findViewById(R.id.shareButton);
         shareButton.setOnClickListener(new View.OnClickListener() {
            @Override
@@ -111,6 +130,23 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         merryChristmasText.setVisibility(View.GONE);
 
         loadRewardedVideoAd();
+
+        mainContentConstraintLayout = (ConstraintLayout) findViewById(R.id.mainContentConstraintLayout);
+
+        _t = new Timer();
+        _t.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    runOnUiThread(new Runnable() {
+                    public void run() {
+                        if (count < drawablearray.length) {
+                            mainContentConstraintLayout.setBackgroundResource(drawablearray[count]);
+                            count = (count + 1) % drawablearray.length;
+                        }
+                    }
+                });
+            }
+        }, 1000, 10000);
     }
 
     private void loadRewardedVideoAd() {
@@ -183,6 +219,11 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         }.start();
     }
 
+    private void changeBackgroundImage() {
+        mainContentConstraintLayout = (ConstraintLayout) findViewById(R.id.mainContentConstraintLayout);
+        mainContentConstraintLayout.setBackgroundResource(R.drawable.background_02);
+    }
+
     // Not replacing with Calendar. Just waiting for devices to move up to API 26 to deprecate this.
     private long getDiffUntilChristmasInMillisForOlderDevices() {
         try {
@@ -221,6 +262,8 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
 
     @Override
     public void onRewardedVideoAdLoaded() {
+        calculateTimeButton.setClickable(true);
+        calculateTimeButton.setText(R.string.calculate_time_button);
         Toast.makeText(this, "Resource loaded.", Toast.LENGTH_SHORT).show();
     }
 
