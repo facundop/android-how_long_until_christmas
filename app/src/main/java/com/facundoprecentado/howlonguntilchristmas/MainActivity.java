@@ -69,9 +69,6 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
         mRewardedVideoAd.setRewardedVideoAdListener(this);
 
-        //daysUntilText = (TextView) findViewById(R.id.daysUntilText);
-        //hoursUntilText = (TextView) findViewById(R.id.hoursUntilText);
-
         calculateTimeButton = (Button) findViewById(R.id.calculateTimeButton);
         calculateTimeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         loadRewardedVideoAd();
 
         // Reward the user.
-        long diff = 0;
+        long diff;
 
         // Newer API can use LocalDateTime, ZonedDateTime and ChronoUnit
         if(Build.VERSION.SDK_INT >= 26) {
@@ -208,13 +205,9 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         return ChronoUnit.MILLIS.between(now, christmas);
     }
 
-    private void showError() {
-        Toast.makeText(this, "An error occurred. Please try again.", Toast.LENGTH_SHORT).show();
-    }
-
     @Override
     public void onRewardedVideoAdLeftApplication() {
-        Toast.makeText(this, "An error occurred. Please try again.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Sorry, you need to finish watching the Ad for the timer to appear.", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -222,11 +215,14 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
 
     @Override
     public void onRewardedVideoAdFailedToLoad(int errorCode) {
+        Toast.makeText(this, "An error occurred. Trying to load again.", Toast.LENGTH_SHORT).show();
         loadRewardedVideoAd();
     }
 
     @Override
-    public void onRewardedVideoAdLoaded() {}
+    public void onRewardedVideoAdLoaded() {
+        Toast.makeText(this, "Resource loaded.", Toast.LENGTH_SHORT).show();
+    }
 
     @Override
     public void onRewardedVideoAdOpened() {}
