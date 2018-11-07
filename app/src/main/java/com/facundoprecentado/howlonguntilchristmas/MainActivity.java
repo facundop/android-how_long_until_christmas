@@ -84,7 +84,9 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         // Use an activity context to get the rewarded video instance.
         mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
         mRewardedVideoAd.setRewardedVideoAdListener(this);
+        loadRewardedVideoAd();
 
+        
         calculateTimeButton = (Button) findViewById(R.id.calculateTimeButton);
         calculateTimeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,8 +131,6 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         merryChristmasText = (TextView) findViewById(R.id.merryChristmasView);
         merryChristmasText.setVisibility(View.GONE);
 
-        loadRewardedVideoAd();
-
         mainContentConstraintLayout = (ConstraintLayout) findViewById(R.id.mainContentConstraintLayout);
 
         _t = new Timer();
@@ -166,6 +166,10 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         loadRewardedVideoAd();
 
         // Reward the user.
+        startTimerUntilChristmas();
+    }
+
+    private void startTimerUntilChristmas() {
         long diff;
 
         // Newer API can use LocalDateTime, ZonedDateTime and ChronoUnit
@@ -219,6 +223,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         }.start();
     }
 
+    // TODO: Move this to CardView
     private void changeBackgroundImage() {
         mainContentConstraintLayout = (ConstraintLayout) findViewById(R.id.mainContentConstraintLayout);
         mainContentConstraintLayout.setBackgroundResource(R.drawable.background_02);
@@ -249,6 +254,9 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
     @Override
     public void onRewardedVideoAdLeftApplication() {
         Toast.makeText(this, "Sorry, you need to finish watching the Ad for the timer to appear.", Toast.LENGTH_SHORT).show();
+        loadRewardedVideoAd();
+        calculateTimeButton.setClickable(true);
+        calculateTimeButton.setText(R.string.calculate_time_button);
     }
 
     @Override
@@ -258,6 +266,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
     public void onRewardedVideoAdFailedToLoad(int errorCode) {
         Toast.makeText(this, "An error occurred. Trying to load again.", Toast.LENGTH_SHORT).show();
         loadRewardedVideoAd();
+        startTimerUntilChristmas();
     }
 
     @Override
