@@ -1,7 +1,9 @@
 package com.facundoprecentado.howlonguntilchristmas;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.icu.util.TimeZone;
 import android.net.Uri;
 import android.os.Build;
@@ -62,19 +64,9 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
     private Button calculateTimeButton;
     private FloatingActionButton shareButton;
     private FloatingActionButton rateButton;
+    private FloatingActionButton selectBackgroundButton;
 
-    private ConstraintLayout mainContentConstraintLayout;
-
-    // TODO: Move to a select screen
-    int[] drawablearray=new int[]{R.drawable.background_01,
-            R.drawable.background_02,
-            R.drawable.background_03,
-            R.drawable.background_04,
-            R.drawable.background_05,
-            R.drawable.background_06,
-            R.drawable.background_07};
-    Timer _t;
-    public static int count=0;
+    private ConstraintLayout contentLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +111,15 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
             }
         });
 
+        selectBackgroundButton = (FloatingActionButton) findViewById(R.id.selectBackgroundButton);
+        selectBackgroundButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent selectBackgroundIntent = new Intent(MainActivity.this, SelectBackgroundActivity.class);
+                startActivityForResult(selectBackgroundIntent, 0);
+            }
+        });
+
         daysEditText = (TextInputLayout) findViewById(R.id.days_text_input);
         daysEditText.setVisibility(View.GONE);
         hoursEditText = (TextInputLayout) findViewById(R.id.hours_text_input);
@@ -130,23 +131,17 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
 
         merryChristmasText = (TextView) findViewById(R.id.merryChristmasView);
         merryChristmasText.setVisibility(View.GONE);
+    }
 
-        mainContentConstraintLayout = (ConstraintLayout) findViewById(R.id.mainContentConstraintLayout);
+    // TODO: Emprolijar flujo
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        SharedPreferences sharedPref = this.getSharedPreferences("my_prefs", Context.MODE_PRIVATE);
+        int background = sharedPref.getInt("background_resource", R.drawable.background_01);
 
-        _t = new Timer();
-        _t.scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    runOnUiThread(new Runnable() {
-                    public void run() {
-                        if (count < drawablearray.length) {
-                            mainContentConstraintLayout.setBackgroundResource(drawablearray[count]);
-                            count = (count + 1) % drawablearray.length;
-                        }
-                    }
-                });
-            }
-        }, 1000, 10000);
+        contentLayout = findViewById(R.id.mainContentConstraintLayout);
+        contentLayout.setBackgroundResource(background);
+
     }
 
     private void loadRewardedVideoAd() {
@@ -223,12 +218,6 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         }.start();
     }
 
-    // TODO: Move this to CardView
-    private void changeBackgroundImage() {
-        mainContentConstraintLayout = (ConstraintLayout) findViewById(R.id.mainContentConstraintLayout);
-        mainContentConstraintLayout.setBackgroundResource(R.drawable.background_02);
-    }
-
     // Not replacing with Calendar. Just waiting for devices to move up to API 26 to deprecate this.
     private long getDiffUntilChristmasInMillisForOlderDevices() {
         try {
@@ -273,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
     public void onRewardedVideoAdLoaded() {
         calculateTimeButton.setClickable(true);
         calculateTimeButton.setText(R.string.calculate_time_button);
-        Toast.makeText(this, "Resource loaded.", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Resource loaded.", Toast.LENGTH_SHORT).show();
     }
 
     @Override
