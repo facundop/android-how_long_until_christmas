@@ -226,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
             Date christmas = sdf.parse("24/12/" + (now.getYear() + 1900) + " 00:00:00");
             return christmas.getTime() - now.getTime();
         } catch (ParseException e) {
-            // TODO: Fix this crap
+            // Nothing to do. To be deprecated.
         }
         return 0;
     }
