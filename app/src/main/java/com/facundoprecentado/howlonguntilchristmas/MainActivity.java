@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
@@ -50,9 +51,16 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements RewardedVideoAdListener {
 
+    // Debug tag, for logging
+    static final String TAG = "HowLongUntilChristmas";
+    static final String SKU_PREMIUM = "premium";
+
     private RewardedVideoAd mRewardedVideoAd;
+    private AdView mBannerAdView;
     private String TestRewardedVideoAd = "ca-app-pub-3940256099942544/5224354917";
     private String RewardedVideoAd = "ca-app-pub-1088902000251944/6033351380";
+    private String TestBannerAd = "ca-app-pub-3940256099942544/6300978111";
+    private String BannerAd = "ca-app-pub-1088902000251944/1965654411";
 
     private TextInputLayout daysEditText;
     private TextInputLayout hoursEditText;
@@ -61,33 +69,27 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
 
     private TextView merryChristmasText;
 
-    private Button calculateTimeButton;
     private FloatingActionButton shareButton;
     private FloatingActionButton rateButton;
     private FloatingActionButton selectBackgroundButton;
 
     private ConstraintLayout contentLayout;
 
+    private SharedPreferences sharedPref;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Use an activity context to get the rewarded video instance.
-        mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
-        mRewardedVideoAd.setRewardedVideoAdListener(this);
-        loadRewardedVideoAd();
+        // Rewarded Ad.
+        // mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
+        // mRewardedVideoAd.setRewardedVideoAdListener(this);
+        // loadRewardedVideoAd();
 
-        
-        calculateTimeButton = (Button) findViewById(R.id.calculateTimeButton);
-        calculateTimeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                calculateTime();
-            }
-        });
-        calculateTimeButton.setClickable(false);
-        calculateTimeButton.setText(R.string.loading);
+        isUserPremium();
+
+        startTimerUntilChristmas();
 
         shareButton = (FloatingActionButton) findViewById(R.id.shareButton);
         shareButton.setOnClickListener(new View.OnClickListener() {
@@ -133,10 +135,24 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         merryChristmasText.setVisibility(View.GONE);
     }
 
+    private void isUserPremium() {
+        // Banner Ad.
+        sharedPref = this.getSharedPreferences("my_prefs", Context.MODE_PRIVATE);
+        boolean premium =sharedPref.getBoolean("premium", false);
+
+        if(!premium) {
+            MobileAds.initialize(this, BannerAd);
+            mBannerAdView = findViewById(R.id.bannerAdView);
+            AdRequest adRequest = new AdRequest.Builder().build();
+            mBannerAdView.loadAd(adRequest);
+        }
+
+    }
+
     // TODO: Emprolijar flujo
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        SharedPreferences sharedPref = this.getSharedPreferences("my_prefs", Context.MODE_PRIVATE);
+        sharedPref = this.getSharedPreferences("my_prefs", Context.MODE_PRIVATE);
         int background = sharedPref.getInt("background_resource", R.drawable.background_01);
 
         contentLayout = findViewById(R.id.mainContentConstraintLayout);
@@ -149,19 +165,9 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                 new AdRequest.Builder().build());
     }
 
-    private void calculateTime() {
-        if (mRewardedVideoAd.isLoaded()) {
-            mRewardedVideoAd.show();
-        }
-    }
-
     @Override
     public void onRewarded(RewardItem reward) {
-        // Load a new Ad
-        loadRewardedVideoAd();
-
-        // Reward the user.
-        startTimerUntilChristmas();
+        // On reward
     }
 
     private void startTimerUntilChristmas() {
@@ -244,8 +250,6 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
     public void onRewardedVideoAdLeftApplication() {
         Toast.makeText(this, "Sorry, you need to finish watching the Ad for the timer to appear.", Toast.LENGTH_SHORT).show();
         loadRewardedVideoAd();
-        calculateTimeButton.setClickable(true);
-        calculateTimeButton.setText(R.string.calculate_time_button);
     }
 
     @Override
@@ -260,8 +264,6 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
 
     @Override
     public void onRewardedVideoAdLoaded() {
-        calculateTimeButton.setClickable(true);
-        calculateTimeButton.setText(R.string.calculate_time_button);
         //Toast.makeText(this, "Resource loaded.", Toast.LENGTH_SHORT).show();
     }
 
