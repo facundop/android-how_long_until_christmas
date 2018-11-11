@@ -11,27 +11,16 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.reward.RewardItem;
-import com.google.android.gms.ads.reward.RewardedVideoAd;
-import com.google.android.gms.ads.reward.RewardedVideoAdListener;
-
-import org.w3c.dom.Text;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -42,25 +31,18 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends AppCompatActivity implements RewardedVideoAdListener {
+public class MainActivity extends AppCompatActivity {
 
     // Debug tag, for logging
     static final String TAG = "HowLongUntilChristmas";
     static final String SKU_PREMIUM = "premium";
 
-    private RewardedVideoAd mRewardedVideoAd;
     private AdView mBannerAdView;
-    private String TestRewardedVideoAd = "ca-app-pub-3940256099942544/5224354917";
-    private String RewardedVideoAd = "ca-app-pub-1088902000251944/6033351380";
     private String TestBannerAd = "ca-app-pub-3940256099942544/6300978111";
     private String BannerAd = "ca-app-pub-1088902000251944/1965654411";
+    private String AppId = "ca-app-pub-1088902000251944~5103413095";
 
     private TextInputLayout daysEditText;
     private TextInputLayout hoursEditText;
@@ -82,16 +64,13 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Rewarded Ad.
-        // mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
-        // mRewardedVideoAd.setRewardedVideoAdListener(this);
-        // loadRewardedVideoAd();
+        Log.i(TAG, "HowLongUntilChristmas started.");
 
         isUserPremium();
 
         startTimerUntilChristmas();
 
-        shareButton = (FloatingActionButton) findViewById(R.id.shareButton);
+        shareButton = findViewById(R.id.shareButton);
         shareButton.setOnClickListener(new View.OnClickListener() {
            @Override
            public void onClick(View v) {
@@ -102,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
                startActivity(sendIntent);
            }
         });
-        rateButton = (FloatingActionButton) findViewById(R.id.rateButton);
+        rateButton = findViewById(R.id.rateButton);
         rateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -113,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
             }
         });
 
-        selectBackgroundButton = (FloatingActionButton) findViewById(R.id.selectBackgroundButton);
+        selectBackgroundButton = findViewById(R.id.selectBackgroundButton);
         selectBackgroundButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -122,26 +101,28 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
             }
         });
 
-        daysEditText = (TextInputLayout) findViewById(R.id.days_text_input);
+        daysEditText = findViewById(R.id.days_text_input);
         daysEditText.setVisibility(View.GONE);
-        hoursEditText = (TextInputLayout) findViewById(R.id.hours_text_input);
+        hoursEditText = findViewById(R.id.hours_text_input);
         hoursEditText.setVisibility(View.GONE);
-        minutesEditText = (TextInputLayout) findViewById(R.id.minutes_text_input);
+        minutesEditText = findViewById(R.id.minutes_text_input);
         minutesEditText.setVisibility(View.GONE);
-        secondsEditText = (TextInputLayout) findViewById(R.id.seconds_text_input);
+        secondsEditText = findViewById(R.id.seconds_text_input);
         secondsEditText.setVisibility(View.GONE);
 
-        merryChristmasText = (TextView) findViewById(R.id.merryChristmasView);
+        merryChristmasText = findViewById(R.id.merryChristmasView);
         merryChristmasText.setVisibility(View.GONE);
     }
 
     private void isUserPremium() {
+        Log.i(TAG, "Check if user is premium.");
+
         // Banner Ad.
         sharedPref = this.getSharedPreferences("my_prefs", Context.MODE_PRIVATE);
         boolean premium =sharedPref.getBoolean("premium", false);
 
         if(!premium) {
-            MobileAds.initialize(this, BannerAd);
+            MobileAds.initialize(this, AppId);
             mBannerAdView = findViewById(R.id.bannerAdView);
             AdRequest adRequest = new AdRequest.Builder().build();
             mBannerAdView.loadAd(adRequest);
@@ -160,17 +141,8 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
 
     }
 
-    private void loadRewardedVideoAd() {
-        mRewardedVideoAd.loadAd(RewardedVideoAd,
-                new AdRequest.Builder().build());
-    }
-
-    @Override
-    public void onRewarded(RewardItem reward) {
-        // On reward
-    }
-
     private void startTimerUntilChristmas() {
+        Log.i(TAG, "Timer started.");
         long diff;
 
         // Newer API can use LocalDateTime, ZonedDateTime and ChronoUnit
@@ -246,33 +218,4 @@ public class MainActivity extends AppCompatActivity implements RewardedVideoAdLi
         return ChronoUnit.MILLIS.between(now, christmas);
     }
 
-    @Override
-    public void onRewardedVideoAdLeftApplication() {
-        Toast.makeText(this, "Sorry, you need to finish watching the Ad for the timer to appear.", Toast.LENGTH_SHORT).show();
-        loadRewardedVideoAd();
-    }
-
-    @Override
-    public void onRewardedVideoAdClosed() { loadRewardedVideoAd(); }
-
-    @Override
-    public void onRewardedVideoAdFailedToLoad(int errorCode) {
-        Toast.makeText(this, "An error occurred. Trying to load again.", Toast.LENGTH_SHORT).show();
-        loadRewardedVideoAd();
-        startTimerUntilChristmas();
-    }
-
-    @Override
-    public void onRewardedVideoAdLoaded() {
-        //Toast.makeText(this, "Resource loaded.", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onRewardedVideoAdOpened() {}
-
-    @Override
-    public void onRewardedVideoStarted() {}
-
-    @Override
-    public void onRewardedVideoCompleted() {}
 }
