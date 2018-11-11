@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
@@ -17,6 +18,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingClientStateListener;
+import com.android.billingclient.api.BillingFlowParams;
+import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchasesUpdatedListener;
+import com.android.billingclient.api.SkuDetails;
+import com.android.billingclient.api.SkuDetailsParams;
+import com.android.billingclient.api.SkuDetailsResponseListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
@@ -30,18 +39,17 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PurchasesUpdatedListener {
 
-    // Debug tag, for logging
     static final String TAG = "HowLongUntilChristmas";
-    static final String SKU_PREMIUM = "premium";
+
 
     private AdView mBannerAdView;
-    private String TestBannerAd = "ca-app-pub-3940256099942544/6300978111";
-    private String BannerAd = "ca-app-pub-1088902000251944/1965654411";
     private String AppId = "ca-app-pub-1088902000251944~5103413095";
 
     private TextInputLayout daysEditText;
@@ -59,47 +67,28 @@ public class MainActivity extends AppCompatActivity {
 
     private SharedPreferences sharedPref;
 
+    // Billing
+    private BillingClient mBillingClient;
+    static final String SKU_PREMIUM = "premium";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.i(TAG, "HowLongUntilChristmas started.");
+        Log.i(TAG, "HowLongUntilChristmas started");
+
+        mBillingClient = BillingClient.newBuilder(this).setListener(this).build();
+
+        checkPurchases();
 
         isUserPremium();
 
         startTimerUntilChristmas();
 
-        shareButton = findViewById(R.id.shareButton);
-        shareButton.setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View v) {
-               Intent sendIntent = new Intent();
-               sendIntent.setAction(Intent.ACTION_SEND);
-               sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_msg) + " https://goo.gl/dTXAbo");
-               sendIntent.setType("text/plain");
-               startActivity(sendIntent);
-           }
-        });
-        rateButton = findViewById(R.id.rateButton);
-        rateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent rateIntent = new Intent();
-                rateIntent.setAction(Intent.ACTION_VIEW);
-                rateIntent.setData(Uri.parse("market://details?id=" + getPackageName()));
-                startActivity(rateIntent);
-            }
-        });
-
-        selectBackgroundButton = findViewById(R.id.selectBackgroundButton);
-        selectBackgroundButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent selectBackgroundIntent = new Intent(MainActivity.this, SelectBackgroundActivity.class);
-                startActivityForResult(selectBackgroundIntent, 0);
-            }
-        });
+        findViewById(R.id.shareButton).setOnClickListener(shareButtonOnClickListener);
+        findViewById(R.id.rateButton).setOnClickListener(rateButtonOnClickListener);
+        findViewById(R.id.selectBackgroundButton).setOnClickListener(selectBackgroundButtonOnClickListener);
 
         daysEditText = findViewById(R.id.days_text_input);
         daysEditText.setVisibility(View.GONE);
@@ -112,6 +101,25 @@ public class MainActivity extends AppCompatActivity {
 
         merryChristmasText = findViewById(R.id.merryChristmasView);
         merryChristmasText.setVisibility(View.GONE);
+
+        buyPremium();
+
+    }
+
+    private void buyPremium() {
+        Log.i(TAG, "buyPremium");
+        // TODO: Implement buyPremium flow
+    }
+
+    private void checkPurchases() {
+        Log.i(TAG, "checkPurchases");
+        Purchase.PurchasesResult purchases = mBillingClient.queryPurchases(BillingClient.SkuType.INAPP);
+        List<Purchase> purchasesList = purchases.getPurchasesList();
+        if(purchasesList != null) {
+            for (Purchase purchase : purchasesList) {
+                Log.i(TAG, purchase.getSku());
+            }
+        }
     }
 
     private void isUserPremium() {
@@ -119,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Banner Ad.
         sharedPref = this.getSharedPreferences("my_prefs", Context.MODE_PRIVATE);
-        boolean premium =sharedPref.getBoolean("premium", false);
+        boolean premium = sharedPref.getBoolean("premium", false);
 
         if(!premium) {
             MobileAds.initialize(this, AppId);
@@ -217,5 +225,46 @@ public class MainActivity extends AppCompatActivity {
 
         return ChronoUnit.MILLIS.between(now, christmas);
     }
+
+    @Override
+    public void onPurchasesUpdated(int responseCode, @Nullable List<Purchase> purchases) {
+
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+
+    }
+
+    // Button Listeners
+    private View.OnClickListener shareButtonOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_msg) + " https://goo.gl/dTXAbo");
+            sendIntent.setType("text/plain");
+            startActivity(sendIntent);
+        }
+    };
+
+    private View.OnClickListener rateButtonOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Intent rateIntent = new Intent();
+            rateIntent.setAction(Intent.ACTION_VIEW);
+            rateIntent.setData(Uri.parse("market://details?id=" + getPackageName()));
+            startActivity(rateIntent);
+        }
+    };
+
+    private View.OnClickListener selectBackgroundButtonOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Intent selectBackgroundIntent = new Intent(MainActivity.this, SelectBackgroundActivity.class);
+            startActivityForResult(selectBackgroundIntent, 0);
+        }
+    };
+    // End Button Listeners
 
 }
