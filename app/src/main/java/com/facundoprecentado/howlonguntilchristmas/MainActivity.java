@@ -61,21 +61,23 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
     // Billing
     private BillingClient mBillingClient;
     static final String SKU_PREMIUM = "premium";
-    private boolean isUserPremium;
+    List<Purchase> purchasesList;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        loadData();
+        loadAds();
 
         mBillingClient = BillingClient.newBuilder(this).setListener(this).build();
 
+        // Billing
         connectBillingClient();
-
-        checkPurchases();
-        isUserPremium();
+        loadPurchases();
+        enablePerks();
+        loadData();
 
         startTimerUntilChristmas();
 
@@ -97,26 +99,28 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
         merryChristmasText.setVisibility(View.GONE);
     }
 
+    private void enablePerks() {
+        if(purchasesList != null) {
+            for (Purchase purchase : purchasesList) {
+                if (purchase.getSku().equals(SKU_PREMIUM)) {
+                    makeUserPremium();
+                }
+            }
+        }
+    }
+
     private void connectBillingClient() {
         mBillingClient.startConnection(new BillingClientStateListener() {
             @Override
             public void onBillingSetupFinished(@BillingClient.BillingResponse int billingResponseCode) {
-
+                loadPurchases();
+                enablePerks();
             }
             @Override
             public void onBillingServiceDisconnected() {
 
             }
         });
-    }
-
-    private void buyPremium() {
-        // Miro el historial de purchases para ver si tiene premium. Si lo tiene, no hay nada para comprar.
-        checkPurchases();
-
-        if(!isUserPremium) {
-            startPurchaseFlow(SKU_PREMIUM, BillingClient.SkuType.INAPP);
-        }
     }
 
     public void startPurchaseFlow(final String skuId, final String billingType) {
@@ -127,16 +131,9 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
         mBillingClient.launchBillingFlow(MainActivity.this, billingFlowParams);
     }
 
-    private void checkPurchases() {
+    private void loadPurchases() {
         Purchase.PurchasesResult purchases = mBillingClient.queryPurchases(BillingClient.SkuType.INAPP);
-        List<Purchase> purchasesList = purchases.getPurchasesList();
-        if(purchasesList != null) {
-            for (Purchase purchase : purchasesList) {
-                if (purchase.getSku().equals(SKU_PREMIUM)) {
-                    makeUserPremium();
-                }
-            }
-        }
+        purchasesList = purchases.getPurchasesList();
     }
 
     private void makeUserPremium() {
@@ -144,15 +141,11 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
         findViewById(R.id.bannerAdView).setVisibility(View.GONE);
     }
 
-    private void isUserPremium() {
-        if(!isUserPremium) {
-            MobileAds.initialize(this, AppId);
-            mBannerAdView = findViewById(R.id.bannerAdView);
-            AdRequest adRequest = new AdRequest.Builder().build();
-            mBannerAdView.loadAd(adRequest);
-        } else {
-            findViewById(R.id.buyPremiumButton).setVisibility(View.GONE);
-        }
+    private void loadAds() {
+        MobileAds.initialize(this, AppId);
+        mBannerAdView = findViewById(R.id.bannerAdView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mBannerAdView.loadAd(adRequest);
     }
 
     // TODO: Emprolijar flujo. Tengo que saber si vengo de comprar algo o de seleccionar un fondo
@@ -188,9 +181,6 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
 
         prefBackground = sharedPref.getInt("background_resource", R.drawable.background_01);
         findViewById(R.id.mainContentConstraintLayout).setBackgroundResource(prefBackground);
-
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putBoolean("premium", false);
     }
 
     // Christmas Timer
@@ -298,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
     private View.OnClickListener buyPremiumButtonOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            buyPremium();
+            startPurchaseFlow(SKU_PREMIUM, BillingClient.SkuType.INAPP);
         }
     };
     // End Button Listeners

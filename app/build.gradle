@@ -14,8 +14,8 @@ android {
         applicationId "com.facundoprecentado.howlonguntilchristmas"
         minSdkVersion 22
         targetSdkVersion 28
-        versionCode 19
-        versionName "1.19"
+        versionCode 21
+        versionName "1.21"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release
     }
