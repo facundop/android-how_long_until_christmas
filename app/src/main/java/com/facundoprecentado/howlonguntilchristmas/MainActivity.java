@@ -11,23 +11,18 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesUpdatedListener;
-import com.android.billingclient.api.SkuDetails;
-import com.android.billingclient.api.SkuDetailsParams;
-import com.android.billingclient.api.SkuDetailsResponseListener;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 
@@ -39,18 +34,17 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements PurchasesUpdatedListener {
 
-    static final String TAG = "HowLongUntilChristmas";
-
-
     private AdView mBannerAdView;
     private String AppId = "ca-app-pub-1088902000251944~5103413095";
+
+    // String bannerAd = ca-app-pub-1088902000251944/1965654411
+    // String testBannerAd = ca-app-pub-3940256099942544/6300978111
 
     private TextInputLayout daysEditText;
     private TextInputLayout hoursEditText;
@@ -59,29 +53,28 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
 
     private TextView merryChristmasText;
 
-    private FloatingActionButton shareButton;
-    private FloatingActionButton rateButton;
-    private FloatingActionButton selectBackgroundButton;
-
     private ConstraintLayout contentLayout;
 
     private SharedPreferences sharedPref;
+    private int prefBackground;
 
     // Billing
     private BillingClient mBillingClient;
     static final String SKU_PREMIUM = "premium";
+    private boolean isUserPremium;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.i(TAG, "HowLongUntilChristmas started");
+        loadData();
 
         mBillingClient = BillingClient.newBuilder(this).setListener(this).build();
 
-        checkPurchases();
+        connectBillingClient();
 
+        checkPurchases();
         isUserPremium();
 
         startTimerUntilChristmas();
@@ -89,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
         findViewById(R.id.shareButton).setOnClickListener(shareButtonOnClickListener);
         findViewById(R.id.rateButton).setOnClickListener(rateButtonOnClickListener);
         findViewById(R.id.selectBackgroundButton).setOnClickListener(selectBackgroundButtonOnClickListener);
+        findViewById(R.id.buyPremiumButton).setOnClickListener(buyPremiumButtonOnClickListener);
 
         daysEditText = findViewById(R.id.days_text_input);
         daysEditText.setVisibility(View.GONE);
@@ -101,44 +95,67 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
 
         merryChristmasText = findViewById(R.id.merryChristmasView);
         merryChristmasText.setVisibility(View.GONE);
+    }
 
-        buyPremium();
+    private void connectBillingClient() {
+        mBillingClient.startConnection(new BillingClientStateListener() {
+            @Override
+            public void onBillingSetupFinished(@BillingClient.BillingResponse int billingResponseCode) {
 
+            }
+            @Override
+            public void onBillingServiceDisconnected() {
+
+            }
+        });
     }
 
     private void buyPremium() {
-        Log.i(TAG, "buyPremium");
-        // TODO: Implement buyPremium flow
+        // Miro el historial de purchases para ver si tiene premium. Si lo tiene, no hay nada para comprar.
+        checkPurchases();
+
+        if(!isUserPremium) {
+            startPurchaseFlow(SKU_PREMIUM, BillingClient.SkuType.INAPP);
+        }
+    }
+
+    public void startPurchaseFlow(final String skuId, final String billingType) {
+        BillingFlowParams billingFlowParams = BillingFlowParams.newBuilder()
+                .setType(billingType)
+                .setSku(skuId)
+                .build();
+        mBillingClient.launchBillingFlow(MainActivity.this, billingFlowParams);
     }
 
     private void checkPurchases() {
-        Log.i(TAG, "checkPurchases");
         Purchase.PurchasesResult purchases = mBillingClient.queryPurchases(BillingClient.SkuType.INAPP);
         List<Purchase> purchasesList = purchases.getPurchasesList();
         if(purchasesList != null) {
             for (Purchase purchase : purchasesList) {
-                Log.i(TAG, purchase.getSku());
+                if (purchase.getSku().equals(SKU_PREMIUM)) {
+                    makeUserPremium();
+                }
             }
         }
     }
 
+    private void makeUserPremium() {
+        findViewById(R.id.buyPremiumButton).setVisibility(View.GONE);
+        findViewById(R.id.bannerAdView).setVisibility(View.GONE);
+    }
+
     private void isUserPremium() {
-        Log.i(TAG, "Check if user is premium.");
-
-        // Banner Ad.
-        sharedPref = this.getSharedPreferences("my_prefs", Context.MODE_PRIVATE);
-        boolean premium = sharedPref.getBoolean("premium", false);
-
-        if(!premium) {
+        if(!isUserPremium) {
             MobileAds.initialize(this, AppId);
             mBannerAdView = findViewById(R.id.bannerAdView);
             AdRequest adRequest = new AdRequest.Builder().build();
             mBannerAdView.loadAd(adRequest);
+        } else {
+            findViewById(R.id.buyPremiumButton).setVisibility(View.GONE);
         }
-
     }
 
-    // TODO: Emprolijar flujo
+    // TODO: Emprolijar flujo. Tengo que saber si vengo de comprar algo o de seleccionar un fondo
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         sharedPref = this.getSharedPreferences("my_prefs", Context.MODE_PRIVATE);
@@ -149,11 +166,37 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
 
     }
 
+    @Override
+    public void onPurchasesUpdated(int responseCode, @Nullable List<Purchase> purchases) {
+        if(responseCode != 0) {
+            Toast.makeText(this, "An error occurred processing the payment.", Toast.LENGTH_SHORT).show();
+        }
+        if (responseCode == 0 && purchases != null) {
+            for (Purchase purchase : purchases) {
+                Toast.makeText(this, "Thank you for your support. Restart the App to remove the Ads.", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+    }
+
+    // Preferences - Preferred background & premium status
+    private void loadData() {
+        sharedPref = this.getSharedPreferences("my_prefs", Context.MODE_PRIVATE);
+
+        prefBackground = sharedPref.getInt("background_resource", R.drawable.background_01);
+        findViewById(R.id.mainContentConstraintLayout).setBackgroundResource(prefBackground);
+
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean("premium", false);
+    }
+
+    // Christmas Timer
     private void startTimerUntilChristmas() {
-        Log.i(TAG, "Timer started.");
         long diff;
 
-        // Newer API can use LocalDateTime, ZonedDateTime and ChronoUnit
         if(Build.VERSION.SDK_INT >= 26) {
             diff = getDiffUntilChristmasInMillis();
         } else {
@@ -163,18 +206,14 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
         new CountDownTimer(diff, 1000) {
 
             public void onTick(long millisBetweenDates) {
-                // Days
                 long days = TimeUnit.MILLISECONDS.toDays(millisBetweenDates);
 
-                // Hours
                 long diffMinusDays = millisBetweenDates - TimeUnit.DAYS.toMillis(days);
                 long hours = TimeUnit.MILLISECONDS.toHours(diffMinusDays);
 
-                // Minutes
                 long diffMinusHours = millisBetweenDates - (TimeUnit.DAYS.toMillis(days) + TimeUnit.HOURS.toMillis(hours));
                 long minutes = TimeUnit.MILLISECONDS.toMinutes(diffMinusHours);
 
-                // Seconds
                 long diffMinusMinutes =  millisBetweenDates - (TimeUnit.DAYS.toMillis(days) + TimeUnit.HOURS.toMillis(hours) + TimeUnit.MINUTES.toMillis(minutes));
                 long seconds = TimeUnit.MILLISECONDS.toSeconds(diffMinusMinutes);
 
@@ -204,7 +243,6 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
         }.start();
     }
 
-    // Not replacing with Calendar. Just waiting for devices to move up to API 26 to deprecate this.
     private long getDiffUntilChristmasInMillisForOlderDevices() {
         try {
             Date now = new Date();
@@ -225,16 +263,7 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
 
         return ChronoUnit.MILLIS.between(now, christmas);
     }
-
-    @Override
-    public void onPurchasesUpdated(int responseCode, @Nullable List<Purchase> purchases) {
-
-    }
-
-    @Override
-    public void onPointerCaptureChanged(boolean hasCapture) {
-
-    }
+    // End Christmas Timer
 
     // Button Listeners
     private View.OnClickListener shareButtonOnClickListener = new View.OnClickListener() {
@@ -263,6 +292,13 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
         public void onClick(View v) {
             Intent selectBackgroundIntent = new Intent(MainActivity.this, SelectBackgroundActivity.class);
             startActivityForResult(selectBackgroundIntent, 0);
+        }
+    };
+
+    private View.OnClickListener buyPremiumButtonOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            buyPremium();
         }
     };
     // End Button Listeners
